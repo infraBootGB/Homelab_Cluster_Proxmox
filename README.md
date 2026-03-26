@@ -46,6 +46,9 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 
 ## 🌐 Schéma de l'infrastructure
 
+> **Note :** Schéma et documentation en cours de mise à jour suite à l'évolution 
+> de l'architecture : exposition des services (migration DMZ locale vers VPS + Pangolin).
+
 ![schema_infrastrucure](Ressources/Docs/Schema_infrastructure.drawio.svg)
 
 ## 🛠️ Compétences mobilisées
