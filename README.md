@@ -1,4 +1,3 @@
-
 # Homelab Cluster Proxmox
 
 <div align="center">
@@ -7,11 +6,7 @@
 
 </div>
 
-
-Homelab réalisé dans le cadre de ma reconversion vers l’administration systèmes et réseaux, après l’obtention du titre TSSR. Ce projet est en cours de réalisation.
-
-
-
+Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'administration systèmes et réseaux. Infrastructure en production, documentée comme en contexte professionnel.
 
 ## 📚 Sommaire
 
@@ -19,91 +14,67 @@ Homelab réalisé dans le cadre de ma reconversion vers l’administration syst�
   - [📚 Sommaire](#-sommaire)
   - [🎯 Objectifs techniques](#-objectifs-techniques)
   - [🏛️ Résumé d'architecture](#️-résumé-darchitecture)
-  - [🌐 Schéma de l’infrastructure](#-schéma-de-linfrastructure)
+  - [🌐 Schéma de l'infrastructure](#-schéma-de-linfrastructure)
   - [🛠️ Compétences mobilisées](#️-compétences-mobilisées)
   - [⚙️ Choix technologiques](#️-choix-technologiques)
   - [📂 Documentation technique](#-documentation-technique)
 
-
-
-
-
 ## 🎯 Objectifs techniques
 
-- Déployer un cluster Proxmox 3 noeuds 
-- Mettre en place segmentation réseau VLAN
-- Sécuriser l’infrastructure 
-- Exposition de service via HAProxy ( à venir)
-- Mettre en place monitoring
-- Mettre en place les sauvegardes (à venir)
-
+- Déployer un cluster Proxmox 3 nœuds en haute disponibilité
+- Mettre en place une segmentation réseau par VLAN
+- Sécuriser l'infrastructure (firewall, IDS, CrowdSec, Zero Trust)
+- Exposer des services via reverse proxy (évolution en cours : VPS + Pangolin)
+- Mettre en place la supervision et les alertes
+- Mettre en place les sauvegardes (PBS — en cours)
 
 ## 🏛️ Résumé d'architecture
 
-- Virtualisation : Cluster Proxmox 3 noeuds (HA manager + réplication ZFS)
-- Stockage : ZFS mirror + réplication inter-nodes (bidirectionnelle par datasets)
+- Virtualisation : Cluster Proxmox 3 nœuds (HA Manager + réplication ZFS)
+- Stockage : ZFS mirror + réplication inter-nœuds (bidirectionnelle par datasets)
 - VLAN 5 : WAN
-- VLAN 10 : Service infra + apps internes
+- VLAN 10 : Services infra + apps internes
 - VLAN 20 : Management Proxmox + UI switch
-- VLAN 30 : Communication CrowdSec (Agents -> LAPI sur OPNsense)
+- VLAN 30 : Communication CrowdSec (Agents → LAPI sur OPNsense)
 - VLAN 99 : Corosync isolé
-- VLAN 100 : Web : services publiés via HAProxy 
+- VLAN 100 : DMZ (architecture en évolution vers VPS + Pangolin)
 - VLAN 4094 : Blackhole
-- DNS interne : Unbound -> AdGuard -> DoH (Quad9)
-- Sécurité : OPNsense + IDS (Natif OPNsense basé sur Suricata) + CrowdSec
-- Sauvegardes : PBS + stratégie 3-2-1 
+- DNS interne : Unbound → AdGuard Home → DoH (Quad9)
+- Sécurité : OPNsense + IDS/IPS (Suricata) + CrowdSec centralisé
+- Sauvegardes : PBS + stratégie 3-2-1 (en cours)
 - Accès distant sécurisé : Tailscale
 
-
-## 🌐 Schéma de l’infrastructure
+## 🌐 Schéma de l'infrastructure
 
 ![schema_infrastrucure](Ressources/Docs/Schema_infrastructure.drawio.svg)
 
 ## 🛠️ Compétences mobilisées
 
-
-- Mise en place d’un cluster Proxmox (VM, LXC, HA basique)
-
+- Mise en place d'un cluster Proxmox (VM, LXC, HA Manager, Affinity Rules)
 - Utilisation de ZFS (mirror, réplication, snapshots)
-
 - Segmentation réseau par VLAN et configuration de switch manageable
-
-- Déploiement d’un firewall OPNsense 
-
-- Supervision avec Zabbix
-
-- Sauvegardes avec Proxmox Backup Server
-
-- Mise en place de DNS interne avec filtrage 
-
+- Déploiement et administration d'un firewall OPNsense
+- Supervision avec Zabbix (agents, alertes Telegram)
 - Sécurisation des accès (SSH par clés, Tailscale, CrowdSec)
-
-- Documentation et tests 
+- DNS interne avec filtrage (AdGuard Home, DoH)
+- Déploiement de conteneurs Docker
+- Documentation technique structurée
 
 ## ⚙️ Choix technologiques
 
-- __Proxmox__ : Solution open-source basée sur Debian et adaptable à un matériel hétérogène
-
-- __ZFS__ : Pour tester intégrité des données, snapshots et réplication
-
-- __OPNsense__ : Firewall open-source communautaire choisi pour découvrir une alternative à pfSense. Utilisation des plugins
-
-- __CrowdSec__ : Choisi pour l'aspect moderne et communautaire
-
-- __AdGuard Home__ : Solution moderne pour le filtrage DNS
-  
-- __Zabbix__ : Logiciel open-source reconnu 
-
-- __PBS__ : Utilisation d'un vrai logiciel de sauvegardes et tests de restauration
-
-- __Tailscale__ : Accès distant moderne et sécurisé au lab
-
-
+- __Proxmox__ : Solution open-source basée sur Debian, adaptable à un matériel hétérogène
+- __ZFS__ : Intégrité des données, snapshots et réplication inter-nœuds
+- __OPNsense__ : Firewall open-source communautaire, alternative à pfSense — utilisation des plugins (CrowdSec, Suricata, Tailscale)
+- __CrowdSec__ : Protection collaborative et moderne, LAPI centralisée sur OPNsense
+- __AdGuard Home__ : Filtrage DNS avec DoH vers Quad9
+- __Zabbix__ : Supervision open-source reconnue, alertes Telegram
+- __Traefik__ : Reverse proxy moderne, routage dynamique, TLS automatique (Let's Encrypt)
+- __Tailscale__ : Accès distant Zero Trust sans exposition de ports
+- __PBS__ : Proxmox Backup Server — sauvegardes et tests de restauration
+- __Docker__ : Déploiement de conteneurs applicatifs (Wiki.js, etc.)
 
 ## 📂 Documentation technique
 
 - [Configuration réseau](Ressources/Docs/configuration_reseau.md)
 - [Guide d'installation](Ressources/Docs/install.md)
-- [Hardware](Ressources/Docs/hardware.md) 
-
-
+- [Hardware](Ressources/Docs/hardware.md)
