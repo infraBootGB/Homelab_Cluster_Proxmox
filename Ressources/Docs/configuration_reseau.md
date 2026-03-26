@@ -20,9 +20,9 @@
 | *Interface*| vtnet1| 10.10.10.1/24 (LAN) __Services__ | -  |VLAN 10 (Services) <br> vmbr0 | Interface LAN OPNsense <br> Services infra + apps non exposées |
 |*Interface* |vtnet3 | 10.10.20.1/24 __MGMT__ | -  |VLAN 20 (MGMT) <br> vmbr0 | Management Proxmox <br> + Management du switch| 
 |*Interface* |vtnet2 | 10.10.30.1/24 __CrowdSec__ | - | opt2   VLAN 30 (CrowdSec) <br> vmbr0 | opt2 - Communication agents CrowdSec nodes vers plugin CrowdSec sur OPNsense    |
-|*Interface* | vtnet4| 172.16.100.1/24 __Web__ | -  |VLAN 100 (Web) <br> vmbr0 |Interface Web OPNsense <br> Services exposés via HAProxy|
+|*Interface* | vtnet4|  172.16.100.1 __DMZ__ | -  |VLAN 100 (DMZ) <br> vmbr0 |Interface DMZ OPNsense <br> Services exposés via Traefik|
 |*Interface* | tailscale0|  - |    -  |opt1 <br> (Tailscale_Remote) | opt1 - Accès nodes via Tailscale 
-| __LXC Web__ |ct-web | 172.16.100.100/24 Web|  172.16.100.1   |VLAN 100 (Web) <br> vmbr0 | Apps exposées |
+| __vm Traefik__ | vm-traefik | 172.16.100.100/24 Web|  172.16.100.1   |VLAN 100 (Web) <br> vmbr0 | Reverse proxy pour exposition apps |
 | __LXC DNS__ | ct-dns    | 10.10.10.50/24  | 10.10.10.1   | VLAN 10 <br> vmbr0  | AdGuardHome |
 | __LXC Zabbix__ | ct-zabbix| 10.10.10.40/24  |  10.10.10.1   | VLAN 10 <br> vmbr0 | Zabbix 
 | __LXC Apps__ | ct-apps     | 10.10.10.30/24  |  10.10.10.1  |VLAN 10 <br> vmbr0 | Docker <br> Wiki.js <br> etc..|
@@ -42,7 +42,7 @@
 |VLAN 20 |MGMT      | 2,3,4,8|2,3,4  |  8       | 
 |VLAN 30 |CrowdSec  | 2,3,4  |2,3,4  |          |
 |VLAN 99 |Corosync  | 2,3,4  | 2,3,4 |          | 
-|VLAN 100|Web       | 2,3,4  | 2,3,4 |          | 
+|VLAN 100|DMZ       | 2,3,4  | 2,3,4 |          | 
 |VLAN 4094|Blackhole| 2,3,4     | - |   2,3,4 |
 - Port 8 = PC configurations/tests  
 

@@ -71,11 +71,12 @@
     - [14.4.1 Plugin SNMP](#1441-plugin-snmp)
     - [14.4.2 Intégration dans Zabbix](#1442-intégration-dans-zabbix)
     - [14.5 Configurer les notifications Telegram](#145-configurer-les-notifications-telegram)
-- [15. HAProxy (À venir)](#15-haproxy-à-venir)
-- [16. LXC apps (À venir)](#16-lxc-apps-à-venir)
-- [17. Proxmox Backup Server (À venir)](#17-proxmox-backup-server-à-venir)
-- [18. Sauvegardes 3-2-1 (À venir)](#18-sauvegardes-3-2-1-à-venir)
-
+- [15. Création de la DMZ](#15-création-de-la-dmz)
+- [16. Vm Traefik en DMZ](#16--vm-traefik-en-dmz)
+- [17. PBS (à venir)](#17-pbs-à-venir)
+- [18. Sauvegardes 3-2-1 (à venir)](#18-sauvegardes-3-2-1-à-venir)
+- [19. LXC apps (à venir)](#19-lxc-apps-à-venir)
+- [20. VPS + Pangolin](#20-vps--pangolin)
 
 # Guide d'installation
 
@@ -1447,7 +1448,7 @@ apt update
 ![zabbix](../Screenshot/37-3_zabbix.png)
 
 
-### 14.5 Configurer les notifications Telegram
+### 14.5 Configuration des notifications Telegram
 
 - Créer le bot sur Telegram et récupérer les informations : bot token + chat ID
 - Zabbix -> Media type -> sélectionner Telegram -> dans les paramètres :
@@ -1469,14 +1470,88 @@ apt update
 
 - Faire un backup du conteneur et de la vm OPNsense
 
-# 15. HAProxy (À venir)
-
-# 16. LXC apps (À venir)
+# 15. Création de la DMZ
 
 
-# 17. Proxmox Backup Server (À venir)
+## 15.1 Création de l'interface DMZ dans proxmox
+
+![alt text](../Screenshot/38-1_Traefik.png)
+
+--> __Apply configuration__
+
+## 15.2 Ajout à OPNsense pour création de la DMZ
+
+- Node -> vm OPNsense -> Hardware -> ajouter l'interface créée. 
+
+![alt text](../Screenshot/38-2_Traefik.png)
+
+- OPNsense -> Assignements -> Add
+
+- OPNsense -> Interfaces -> DMZ -> Configurer l'IP (/24 = réseau)
+
+
+# 16.  Vm Traefik en DMZ
+
+## 16.1 Création de la VM
+
+- Créer le dataset pour la vm
+
+```bash 
+    zfs create tank/vmdata/vm-traefik
+    zfs set compression=lz4 tank/vmdata/vm-traefik
+    zfs set atime=off tank/vmdata/vm-traefik
+```
+
+- Créer la vm debian 12
+
+![alt text](../Screenshot/38-3_Traefik.png)
+
+- Installer Debian 12 et attribuer l'ip statique 172.16.100.100/24 (vmbr0 sans tag VLAN)
+- DNS = interface DMZ du firewall
+
+
+
+## 16.2 Règles OPNsense pour l'interface DMZ
+
+- Ajouter :
+  
+
+|Protocol |	Source	| Port	| Destination| Port |	Gateway |	Schedule	|	Description |
+|---------|--------|----------|----------|-----|----------|----------------|-----------------|
+|IPv4 TCP/UDP |	172.16.100.100|	*| This Firewall|	 (53)|	*	| * |	Allow DNS |	   
+|IPv4 TCP|	DMZ net|	*|	*|	HTTP (80)|	*|	*	|	Allow HTTP	|   
+|IPv4 TCP|	DMZ net|	*|	*|	HTTPS (443)|	*|	*|		Allow HTTPS|	   
+|IPv4 ICMP|	172.16.100.100/32|	*|	*|	*|	*|	*|	Allow ICMP|
+| IPv4 *|	DMZ net|	*|	*|	*|	*|	*|		Block all DMZ out|
+
+
+## 16.3 Règle NAT Outbound pour la DMZ
+
+- Ajouter :
+  
+|Interface	|Source	|Source Port	|Destination	|Destination Port|	NAT Address|	NAT Port|	Static Port|	Description|
+|----|----|----|-----|------|------|-------|------|-------|
+|VLAN5_WAN|	DMZ net|	*|	*|	*|	Interface address|	*|	NO|	NAT DMZ|
+
+
+## 16.4 Tests et mise à jours
+
+- Tester la connection avec ping entre et depuis la vm et le firewall
+- Tester la résolution DNS
+- Faire la mise à jours de la vm (si besoin modifier /etc/apt/sources.list)
+
+
+ 
+# 17. PBS (à venir)
+
 
 # 18. Sauvegardes 3-2-1 (À venir)
+
+
+# 19. LXC apps (À venir)
+
+
+# 20. VPS + Pangolin
 
         
 
