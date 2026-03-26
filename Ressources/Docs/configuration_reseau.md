@@ -1,5 +1,8 @@
 # Configuration réseau (finale)
 
+> **Note :** La DMZ (VLAN 100 / vm-traefik) est en place mais l'exposition des services
+> évoluera vers  VPS + Pangolin. Le PBS (vm-pbs) est planifié, non encore déployé.
+
 - VLAN aware activé sur vmbr0
 
 
@@ -15,14 +18,14 @@
 | __Node 2__        | Proxmox2      | 10.10.30.102/24  | -  |  VLAN 30 (CrowdSec)  <br> vmbr0 | Communication agents CrowdSec nodes vers plugin Crowdsec sur OPNsense |
 | __Node 3__        | Proxmox3      | 10.10.30.103/24  | -   | VLAN 30 (CrowdSec) <br> vmbr0 | Communication agents CrowdSec nodes vers plugin Crowdsec sur OPNsense |
 | __Switch__ | Switch | 10.10.20.111 | 10.10.20.1| - |UI switch <br> 802.1Q  Tags VLANs 5,10,20,30,99,100 |
-| __Firewall__ | vm-OPNsense | Voir interfaces|- |-  | Firewall central|
-| *Interface* | vtnet0| 192.168.1.210/24 <br> __WAN__ |  - | VLAN 5 (WAN)<br> vmbr0 | vmbr0 : VLAN aware <br> OPNsense 25.7 <br> Crowdsec (Plugin) <br> Suricata (Plugin) <br> Tailscale (Plugin) <br> Agent Qemu (Plugin) <br> HA Proxy|
+| __Firewall__ | vm-OPNsense | Voir interfaces|- |-  | Firewall central <br> OPNsense 25.7 <br> Crowdsec (Plugin) <br> Suricata (Plugin) <br> Tailscale (Plugin) <br> Agent Qemu (Plugin)|
+| *Interface* | vtnet0| 192.168.1.210/24 <br> __WAN__ |  - | VLAN 5 (WAN)<br> vmbr0 | vmbr0 : VLAN aware <br> |
 | *Interface*| vtnet1| 10.10.10.1/24 (LAN) __Services__ | -  |VLAN 10 (Services) <br> vmbr0 | Interface LAN OPNsense <br> Services infra + apps non exposées |
 |*Interface* |vtnet3 | 10.10.20.1/24 __MGMT__ | -  |VLAN 20 (MGMT) <br> vmbr0 | Management Proxmox <br> + Management du switch| 
 |*Interface* |vtnet2 | 10.10.30.1/24 __CrowdSec__ | - | opt2   VLAN 30 (CrowdSec) <br> vmbr0 | opt2 - Communication agents CrowdSec nodes vers plugin CrowdSec sur OPNsense    |
-|*Interface* | vtnet4|  172.16.100.1 __DMZ__ | -  |VLAN 100 (DMZ) <br> vmbr0 |Interface DMZ OPNsense <br> Services exposés via Traefik|
+|*Interface* | vtnet4|  172.16.100.1 __DMZ__ | -  |VLAN 100 (DMZ) <br> vmbr0 | Interface DMZ OPNsense <br> Architecture en évolution vers VPS + Pangolin|
 |*Interface* | tailscale0|  - |    -  |opt1 <br> (Tailscale_Remote) | opt1 - Accès nodes via Tailscale 
-| __vm Traefik__ | vm-traefik | 172.16.100.100/24 Web|  172.16.100.1   |VLAN 100 (Web) <br> vmbr0 | Reverse proxy pour exposition apps |
+| __vm Traefik__ | vm-traefik | 172.16.100.100/24 Web|  172.16.100.1   |VLAN 100 (Web) <br> vmbr0 | Reverse proxy — architecture en évolution vers VPS + Pangolin |
 | __LXC DNS__ | ct-dns    | 10.10.10.50/24  | 10.10.10.1   | VLAN 10 <br> vmbr0  | AdGuardHome |
 | __LXC Zabbix__ | ct-zabbix| 10.10.10.40/24  |  10.10.10.1   | VLAN 10 <br> vmbr0 | Zabbix 
 | __LXC Apps__ | ct-apps     | 10.10.10.30/24  |  10.10.10.1  |VLAN 10 <br> vmbr0 | Docker <br> Wiki.js <br> etc..|
