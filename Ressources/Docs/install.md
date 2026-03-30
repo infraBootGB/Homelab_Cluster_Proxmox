@@ -1154,6 +1154,11 @@ __Architecture: Clients LAN -> OPNsense/Unbound (DNS) ->  AdGuardHome (filtrage)
 
 __--> Apply__
 
+- Ajout d'un DNS secondaire en cas de panne du ct-dns : 9.9.9.9 port 53, domain vide (= toutes les requêtes)
+
+
+
+
 - Console OPNsense -> Services -> Unbound DNS -> General -> Restart (bouton dans l'interface)
 
 - La suite de la configuration se fait en ssh depuis une vm du LAN OPNsense.
