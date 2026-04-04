@@ -84,12 +84,14 @@
     - [17.1.1 Configuration réseau](#1711-configuration-réseau)
     - [17.1.2 Création VM WEB (Node 2)](#1712-création-vm-web-node-2)
     - [17.1.3 Docker](#1713-docker)
-  - [17.2 VPS + Pangolin](#172-vps--pangolin)
+  - [17.2 INstallation VPS + Pangolin](#172-installation-vps--pangolin)
     - [17.2.1 VPS](#1721-vps)
     - [17.2.2 Docker sur VPS](#1722-docker-sur-vps)
     - [17.2.3 Pangolin](#1723-pangolin)
     - [17.2.4 Client Newt sur vm-web](#1724-client-newt-sur-vm-web)
-  - [17-3 Services Dockers dan vm-web](#17-3-services-dockers-dan-vm-web)
+  - [17-3 Services Docker dans vm-web (test avec Wiki.js)](#17-3-services-docker-dans-vm-web-test-avec-wikijs)
+    - [17.3.1 Installation de Wiki.js](#1731-installation-de-wikijs)
+    - [17.3.2 Exposition via Pangolin](#1732-exposition-via-pangolin)
 - [18. PBS (À venir)](#18-pbs-à-venir)
 - [19. Sauvegardes 3-2-1](#19-sauvegardes-3-2-1)
 
@@ -1620,7 +1622,7 @@ apt update
 - Installer docker engine : [Voir la doc officielle pour Debian](https://docs.docker.com/engine/install/debian/)
 
 
-## 17.2 VPS + Pangolin
+## 17.2 INstallation VPS + Pangolin
 
 ### 17.2.1 VPS
 - Activer le vps (ici ubuntu server)
@@ -1654,7 +1656,7 @@ chmod 600 /home/adminuser/.ssh/authorized_keys
 - installer docker [voir doc officielle pour Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
 
-- Pointer le domaine vers l'ip du vps
+- Pointer le domaine vers l'ip du VPS
 
 - Ouvir les port nécesssaires pour Pangolin (wireguard) sur le firwall du VPS
 - 
@@ -1688,13 +1690,103 @@ sudo chown adminuser:adminuser /opt/pangolin
 
 - Installer le client Newt sur la vm en VLAN 40 : les commandes sont indiquées lors de la création du serveur Pangolin (https://docs.pangolin.net/self-host/quick-install)
 
+- Configurer Newt en service systemd  pour qu'il reste actif
+
+```bash
+sudo nano /etc/systemd/system/newt.service
+```
+
+```bash
+[Unit]
+Description=Newt Pangolin Tunnel
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/newt --id xxxxxxxxxx --secret xxxxxxxxxxxxxxx --endpoint https://pangolin.rafikix.fr
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+```bash
+sudo systemctl enable newt
+sudo systemctl start newt
+sudo systemctl status newt
+```
 
 
-## 17-3 Services Dockers dan vm-web
 
-- Créer les services docker en vlan 40
 
-- Créer une ressources dans pangolin 
+## 17-3 Services Docker dans vm-web (test avec Wiki.js)
+
+### 17.3.1 Installation de Wiki.js 
+
+- Créer le répertoire pour wikijs
+
+```bash
+sudo mkdir -p /opt/wikijs
+```
+
+- Récupérer le template docker-compose dans la [doc Wiki.js](https://docs.requarks.io/install/docker) et créer le fichier docker-compose
+
+
+```bash
+cd /opt/wikijs
+sudo nano docker-compose.yml
+```
+
+- Modifier le template
+
+
+```yml
+        ports:
+            - "3000:3000" #format "host:container". Wiki.js écoute sur 3000 dans le container. La VM expose sur 3000 et Pangolin pointera dessus
+
+          DB_USER: ${POSTGRES_USER}
+          DB_PASS: ${POSTGRES_PASSWORD}
+          DB_NAME: ${POSTGRES_DB}
+```
+
+- Créer le fichier .env pour stocker les variables
+
+```bash
+cd /opt/wikijs
+sudo nano .env
+sudo chmod 600 /opt/wikijs/.env
+```
+
+
+- Enregistrer les credentials dans .env
+
+- Se placer dans le dossier /opt/wiki.js
+
+- Lancer le contenair
+
+```bash
+sudo docker compose up -d
+```
+
+- Vérifier l'état du contenair
+
+```bash
+sudo docker compose ps
+```
+
+### 17.3.2 Exposition via Pangolin
+
+Un fois le service déployé il faut créer une ressources sur Pangolin pour le rendre disponible.
+
+- Pangolin -> Ressource -> public /privé
+
+![Pangolin](../Screenshot/39-0_Pangolin.png)
+
+- Accéder via url indiquée dans accès :
+
+![wiki.js](../Screenshot/39-1_Pangolin.png)
+
+
+
 
 
 # 18. PBS (À venir)
