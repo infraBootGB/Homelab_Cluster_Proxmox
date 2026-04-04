@@ -80,9 +80,16 @@
   - [16.3 Règle NAT Outbound pour la DMZ](#163-règle-nat-outbound-pour-la-dmz)
   - [16.4 Tests et mise à jours](#164-tests-et-mise-à-jours)
 - [17. Exposition des services](#17-exposition-des-services)
-  - [17.1 VM Docker VLAN40 (Newt + Services)](#171-vm-docker-vlan40-newt--services)
+  - [17.1 VM WEB VLAN40 (Newt + Services)](#171-vm-web-vlan40-newt--services)
+    - [17.1.1 Configuration réseau](#1711-configuration-réseau)
+    - [17.1.2 Création VM WEB (Node 2)](#1712-création-vm-web-node-2)
+    - [17.1.3 Docker](#1713-docker)
   - [17.2 VPS + Pangolin](#172-vps--pangolin)
-  - [17.3 DNS + Accès publique](#173-dns--accès-publique)
+    - [17.2.1 VPS](#1721-vps)
+    - [17.2.2 Docker sur VPS](#1722-docker-sur-vps)
+    - [17.2.3 Pangolin](#1723-pangolin)
+    - [17.2.4 Client Newt sur vm-web](#1724-client-newt-sur-vm-web)
+  - [17-3 Services Dockers dan vm-web](#17-3-services-dockers-dan-vm-web)
 - [18. PBS (À venir)](#18-pbs-à-venir)
 - [19. Sauvegardes 3-2-1](#19-sauvegardes-3-2-1)
 
@@ -1683,9 +1690,9 @@ sudo chown adminuser:adminuser /opt/pangolin
 
 
 
-## 17-3 Services Dockers dan vm-WEB
+## 17-3 Services Dockers dan vm-web
 
-- Créer les service sdocker en vlan 40
+- Créer les services docker en vlan 40
 
 - Créer une ressources dans pangolin 
 
