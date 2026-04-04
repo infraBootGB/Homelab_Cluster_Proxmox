@@ -70,13 +70,21 @@
   - [14.4 Intégration OPNsense dans zabbix](#144-intégration-opnsense-dans-zabbix)
     - [14.4.1 Plugin SNMP](#1441-plugin-snmp)
     - [14.4.2 Intégration dans Zabbix](#1442-intégration-dans-zabbix)
-    - [14.5 Configurer les notifications Telegram](#145-configurer-les-notifications-telegram)
-- [15. Création de la DMZ](#15-création-de-la-dmz)
-- [16. Vm Traefik en DMZ](#16--vm-traefik-en-dmz)
-- [17. PBS (à venir)](#17-pbs-à-venir)
-- [18. Sauvegardes 3-2-1 (à venir)](#18-sauvegardes-3-2-1-à-venir)
-- [19. LXC apps (à venir)](#19-lxc-apps-à-venir)
-- [20. VPS + Pangolin](#20-vps--pangolin)
+    - [14.5 Configuration des notifications Telegram](#145-configuration-des-notifications-telegram)
+- [15. Création de la DMZ (Abandonné - voir 17)](#15-création-de-la-dmz-abandonné---voir-17)
+  - [15.1 Création de l'interface DMZ dans proxmox](#151-création-de-linterface-dmz-dans-proxmox)
+  - [15.2 Ajout à OPNsense pour création de la DMZ](#152-ajout-à-opnsense-pour-création-de-la-dmz)
+- [16.  Vm Traefik en DMZ (Abandonné - voir 17)](#16--vm-traefik-en-dmz-abandonné---voir-17)
+  - [16.1 Création de la VM](#161-création-de-la-vm)
+  - [16.2 Règles OPNsense pour l'interface DMZ](#162-règles-opnsense-pour-linterface-dmz)
+  - [16.3 Règle NAT Outbound pour la DMZ](#163-règle-nat-outbound-pour-la-dmz)
+  - [16.4 Tests et mise à jours](#164-tests-et-mise-à-jours)
+- [17. Exposition des services](#17-exposition-des-services)
+  - [17.1 VM Docker VLAN40 (Newt + Services)](#171-vm-docker-vlan40-newt--services)
+  - [17.2 VPS + Pangolin](#172-vps--pangolin)
+  - [17.3 DNS + Accès publique](#173-dns--accès-publique)
+- [18. PBS (À venir)](#18-pbs-à-venir)
+- [19. Sauvegardes 3-2-1](#19-sauvegardes-3-2-1)
 
 # Guide d'installation
 
@@ -1475,8 +1483,9 @@ apt update
 
 - Faire un backup du conteneur et de la vm OPNsense
 
-# 15. Création de la DMZ
+# 15. Création de la DMZ (Abandonné - voir 17)
 
+> Remplacé par VPS + Pangolin
 
 ## 15.1 Création de l'interface DMZ dans proxmox
 
@@ -1495,7 +1504,9 @@ apt update
 - OPNsense -> Interfaces -> DMZ -> Configurer l'IP (/24 = réseau)
 
 
-# 16.  Vm Traefik en DMZ
+# 16.  Vm Traefik en DMZ (Abandonné - voir 17)
+
+> Remplacé par VPS + Pangolin
 
 ## 16.1 Création de la VM
 
@@ -1547,16 +1558,145 @@ apt update
 
 
  
-# 17. PBS (à venir)
+# 17. Exposition des services
+
+> Suite à la modification d'architecture pour l'exposition des services, VLAN 10 servira uniquement pour les services Infra (Aguard, Zabbix etc..)
+> Création de "VLAN 40 Services Web" pour les services exposé pour une meilleur isolation.
+
+## 17.1 VM WEB VLAN40 (Newt + Services)
+
+### 17.1.1 Configuration réseau
+- Créer le VLAN 40 sur la switch (ports 2,3,4 tagged)
+- Créer l'interface dans Proxmox (Linux VLAN) sur les 3 noeuds : 
+  - vmbr0.40
+  - IP 10.10.40.0/24 (pas de gateway)
+  - __--> Apply Configuration__
+
+- Ajouter l'interface au Hardware OPNsense 
+- Assigner l'interface dans OPNsense
+    - IP 10.10.40.1
+- Enregistrer les règles firewall OPNsense
 
 
-# 18. Sauvegardes 3-2-1 (À venir)
+|Protocol |	Source |	Port|	Destination|	Port|	Gateway|	Schedule|		Description| 	    
+|--|--|--|--|--|--|--|--|
+|IPv4 TCP|	VLAN40_Services_WEB net|	*|	*|	HTTP (80)|	*|	*|		allow HTTP|	   
+|IPv4 TCP|	VLAN40_Services_WEB net|	*|	*|	HTTPS (443)|	*|	*|		allow HTTPS|	   
+|IPv4 TCP/UDP|	VLAN40_Services_WEB net|	*|	10.10.10.50| DNS (53) |	*|	* |		allow DNS AdguardHome|	   
+|IPv4 ICMP|	VLAN40_Services_WEB net|	*|	*|	*|	*|	*|		allow ICMP	|   
+|IPv4 * |	VLAN40_Services_WEB net|	*|	*|	*|	*|	*|			Deny all|
+
+- Enregistrer la règle NAT Outbound
 
 
-# 19. LXC apps (À venir)
+|Interface|	Source|	Source Port|	Destination|	Destination Port|	NAT Address|	NAT Port|	Static Port|	Description	|    
+|--|--|--|--|--|--|--|--|--|	   
+|VLAN5_WAN|	VLAN40_Services_WEB net|	*|	*	|*	|Interface address|	*|	NO	|NAT vlan 40 	|   
+
+### 17.1.2 Création VM WEB (Node 2)
 
 
-# 20. VPS + Pangolin
+- VM Debian 12 :
+  - 2 CPU
+  - 4Go RAM
+  - Disque 50Go
+  - IP 10.10.40.100
+  - Gateway 10.10.40.1
+  - DNS 10.10.10.50  
+  - tank-vm-data-node2
+  - VLAN Tag 40
+  - Faire la mise à jour et redémarrer
+  - configurer ssh
+
+### 17.1.3 Docker
+
+- Installer docker engine : [Voir la doc officielle pour Debian](https://docs.docker.com/engine/install/debian/)
+
+
+## 17.2 VPS + Pangolin
+
+### 17.2.1 VPS
+- Activer le vps (ici ubuntu server)
+- Activer le parfeu
+```bash
+ufw allow 22/tcp      # SSH
+ufw allow 80/tcp      # HTTP (Traefik)
+ufw allow 443/tcp     # HTTPS (Traefik)
+ufw enable
+```
+ - faire la mise à jour du serveur
+
+- créer un nouvel utilisateur et l'inclure dans le groupe sudo
+
+- copier le dossier ssh de root vers adminuser
+
+```bash
+mkdir -p /home/adminuser/.ssh
+cp ~/.ssh/authorized_keys /home/adminuser/.ssh/
+chown -R adminuser:adminuser /home/adminuser/.ssh
+chmod 700 /home/adminuser/.ssh
+chmod 600 /home/adminuser/.ssh/authorized_keys
+```
+- tester la connexion ssh avec le nouvel utilisateur dans une autre shell  
+- Une fois ok configurer ssh pour désactiver connection par mot de passe et supprimer accès root.
+
+- tester que la connexion ne fonctionne pas avec root
+
+### 17.2.2 Docker sur VPS
+
+- installer docker [voir doc officielle pour Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+
+
+- Pointer le domaine vers l'ip du vps
+
+- Ouvir les port nécesssaires pour Pangolin (wireguard) sur le firwall du VPS
+- 
+```bash
+ufw allow 51820/udp   # WireGuard (Pangolin)
+ufw allow 21820/udp   # UDP pour les clients
+```
+
+### 17.2.3 Pangolin
+
+- Autoriser wireguard dans le vlan 40 sur OPNSENSE
+
+|Protocol |	Source |	Port|	Destination|	Port|	Gateway|	Schedule|		Description| 	    
+|--|--|--|--|--|--|--|--| 
+|IPv4 UDP|	VLAN40_Services_WEB net|	*|	*|	51820|	*|	*	|	allow wireguard	  | 
+|IPv4 UDP	|VLAN40_Services_WEB net|	*|	*|	21820|	*|	*	|	allow wireguard  |
+
+
+- Créer le dossier dédié pour Pangolin et installer (https://docs.pangolin.net/self-host/quick-install)
+
+```bash
+sudo mkdir -p /opt/pangolin
+sudo chown adminuser:adminuser /opt/pangolin
+```
+- Lancer l 'installer (crée les dochiers docker automatiquement)
+
+- Créer l'accès administrateur pangolin (chemin indiqué en fin d'installation)
+- Créer le serveur Pangolin
+
+### 17.2.4 Client Newt sur vm-web
+
+- Installer le client Newt sur la vm en VLAN 40 : les commandes sont indiquées lors de la création du serveur Pangolin (https://docs.pangolin.net/self-host/quick-install)
+
+
+
+## 17-3 Services Dockers dan vm-WEB
+
+- Créer les service sdocker en vlan 40
+
+- Créer une ressources dans pangolin 
+
+
+# 18. PBS (À venir)
+
+
+# 19. Sauvegardes 3-2-1
+
+
+
 
         
 
