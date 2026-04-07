@@ -26,7 +26,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - Sécuriser l'infrastructure (firewall, IDS, CrowdSec, Zero Trust)
 - Exposer des services via reverse proxy (évolution en cours : VPS + Pangolin)
 - Mettre en place la supervision et les alertes
-- Mettre en place les sauvegardes (PBS — en cours)
+- Mettre en place les sauvegardes (PBS - en cours)
 
 ## 🏛️ Résumé d'architecture
 
@@ -35,21 +35,24 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - VLAN 5 : WAN
 - VLAN 10 : Services infra + apps internes
 - VLAN 20 : Management Proxmox + UI switch
-- VLAN 30 : Communication CrowdSec (Agents → LAPI sur OPNsense)
+- VLAN 30 : Communication CrowdSec (Agents -> LAPI sur OPNsense)
+- VLAN 40 : Service docker exposés via Pangolin (client newt)
 - VLAN 99 : Corosync isolé
-- VLAN 100 : DMZ (architecture en évolution vers VPS + Pangolin)
 - VLAN 4094 : Blackhole
-- DNS interne : Unbound → AdGuard Home → DoH (Quad9)
-- Sécurité : OPNsense + IDS/IPS (Suricata) + CrowdSec centralisé
-- Sauvegardes : PBS + stratégie 3-2-1 (en cours)
+- DNS interne : Unbound -> AdGuard Home -> DoH (Quad9)
+- Sécurité : OPNsense + IDS (Suricata) + CrowdSec centralisé
+- Exposition des dervices via VPS + Pangolin (Traefik + Wireguard)
 - Accès distant sécurisé : Tailscale
+- Sauvegardes : PBS + stratégie 3-2-1 (en cours)
+
+> Note : VLAN 100 : DMZ - non utilisé (architecture migrée vers VPS + Pangolin)
+
 
 ## 🌐 Schéma de l'infrastructure
 
-> **Note :** Schéma et documentation en cours de mise à jour suite à l'évolution 
-> de l'architecture : exposition des services (migration DMZ locale vers VPS + Pangolin).
 
-![schema_infrastrucure](Ressources/Docs/Schema_infrastructure.drawio.svg)
+
+![alt text](Ressources/Docs/Schema_infrastructure_v2.drawio.svg)
 
 ## 🛠️ Compétences mobilisées
 
@@ -62,18 +65,21 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - DNS interne avec filtrage (AdGuard Home, DoH)
 - Déploiement de conteneurs Docker
 - Documentation technique structurée
+- Gestion d'un VPS pour exposer les services Docker
+- Reverse proxy
+- Wireguard
 
 ## ⚙️ Choix technologiques
 
 - __Proxmox__ : Solution open-source basée sur Debian, adaptable à un matériel hétérogène
 - __ZFS__ : Intégrité des données, snapshots et réplication inter-nœuds
-- __OPNsense__ : Firewall open-source communautaire, alternative à pfSense — utilisation des plugins (CrowdSec, Suricata, Tailscale)
+- __OPNsense__ : Firewall open-source communautaire, alternative à pfSense - utilisation des plugins (CrowdSec, Suricata, Tailscale)
 - __CrowdSec__ : Protection collaborative et moderne, LAPI centralisée sur OPNsense
 - __AdGuard Home__ : Filtrage DNS avec DoH vers Quad9
 - __Zabbix__ : Supervision open-source reconnue, alertes Telegram
-- __Traefik__ : Reverse proxy moderne, routage dynamique, TLS automatique (Let's Encrypt)
+- __Pangolin__ : Solution moderne regroupant un reverse proxy traefik, routage dynamique, TLS automatique (Let's Encrypt), wireguard
 - __Tailscale__ : Accès distant Zero Trust sans exposition de ports
-- __PBS__ : Proxmox Backup Server — sauvegardes et tests de restauration
+- __PBS__ : Proxmox Backup Server - sauvegardes et tests de restauration
 - __Docker__ : Déploiement de conteneurs applicatifs (Wiki.js, etc.)
 
 ## 📂 Documentation technique

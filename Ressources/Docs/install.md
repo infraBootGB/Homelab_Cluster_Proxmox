@@ -78,22 +78,27 @@
   - [16.1 Création de la VM](#161-création-de-la-vm)
   - [16.2 Règles OPNsense pour l'interface DMZ](#162-règles-opnsense-pour-linterface-dmz)
   - [16.3 Règle NAT Outbound pour la DMZ](#163-règle-nat-outbound-pour-la-dmz)
-  - [16.4 Tests et mise à jours](#164-tests-et-mise-à-jours)
+  - [16.4 Tests et mise à jour](#164-tests-et-mise-à-jour)
 - [17. Exposition des services](#17-exposition-des-services)
   - [17.1 VM WEB VLAN40 (Newt + Services)](#171-vm-web-vlan40-newt--services)
     - [17.1.1 Configuration réseau](#1711-configuration-réseau)
     - [17.1.2 Création VM WEB (Node 2)](#1712-création-vm-web-node-2)
     - [17.1.3 Docker](#1713-docker)
-  - [17.2 INstallation VPS + Pangolin](#172-installation-vps--pangolin)
+  - [17.2 Installation VPS + Pangolin](#172-installation-vps--pangolin)
     - [17.2.1 VPS](#1721-vps)
     - [17.2.2 Docker sur VPS](#1722-docker-sur-vps)
     - [17.2.3 Pangolin](#1723-pangolin)
     - [17.2.4 Client Newt sur vm-web](#1724-client-newt-sur-vm-web)
-  - [17-3 Services Docker dans vm-web (test avec Wiki.js)](#17-3-services-docker-dans-vm-web-test-avec-wikijs)
+      - [17.2.4.1 Dans Docker](#17241-dans-docker)
+      - [17.2.4.2 Avec Systemd (Alternative)](#17242-avec-systemd-alternative)
+  - [17.3 Services Docker dans vm-web (test avec Wiki.js)](#173-services-docker-dans-vm-web-test-avec-wikijs)
     - [17.3.1 Installation de Wiki.js](#1731-installation-de-wikijs)
     - [17.3.2 Exposition via Pangolin](#1732-exposition-via-pangolin)
+  - [17.4 Crowdsec sur VPS](#174-crowdsec-sur-vps)
+    - [17.4.1 Installation Crowdsec](#1741-installation-crowdsec)
+    - [17.4.2 Acquisition des logs pour traefik](#1742-acquisition-des-logs-pour-traefik)
 - [18. PBS (À venir)](#18-pbs-à-venir)
-- [19. Sauvegardes 3-2-1](#19-sauvegardes-3-2-1)
+- [19. Sauvegardes 3-2-1 (À venir)](#19-sauvegardes-3-2-1-à-venir)
 
 # Guide d'installation
 
@@ -1559,18 +1564,18 @@ apt update
 |VLAN5_WAN|	DMZ net|	*|	*|	*|	Interface address|	*|	NO|	NAT DMZ|
 
 
-## 16.4 Tests et mise à jours
+## 16.4 Tests et mise à jour
 
 - Tester la connection avec ping entre et depuis la vm et le firewall
 - Tester la résolution DNS
-- Faire la mise à jours de la vm (si besoin modifier /etc/apt/sources.list)
+- Faire la mise à jour de la vm (si besoin modifier /etc/apt/sources.list)
 
 
  
 # 17. Exposition des services
 
 > Suite à la modification d'architecture pour l'exposition des services, VLAN 10 servira uniquement pour les services Infra (Aguard, Zabbix etc..)
-> Création de "VLAN 40 Services Web" pour les services exposé pour une meilleur isolation.
+> Création de "VLAN 40 Services Web" pour les services exposés pour une meilleur isolation.
 
 ## 17.1 VM WEB VLAN40 (Newt + Services)
 
@@ -1622,15 +1627,15 @@ apt update
 - Installer docker engine : [Voir la doc officielle pour Debian](https://docs.docker.com/engine/install/debian/)
 
 
-## 17.2 INstallation VPS + Pangolin
+## 17.2 Installation VPS + Pangolin
 
 ### 17.2.1 VPS
 - Activer le vps (ici ubuntu server)
-- Activer le parfeu
+- Activer le firewall
 ```bash
 ufw allow 22/tcp      # SSH
-ufw allow 80/tcp      # HTTP (Traefik)
-ufw allow 443/tcp     # HTTPS (Traefik)
+ufw allow 80/tcp      # HTTP 
+ufw allow 443/tcp     # HTTPS 
 ufw enable
 ```
  - faire la mise à jour du serveur
@@ -1653,12 +1658,12 @@ chmod 600 /home/adminuser/.ssh/authorized_keys
 
 ### 17.2.2 Docker sur VPS
 
-- installer docker [voir doc officielle pour Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+- Installer docker [voir doc officielle pour Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
 
 - Pointer le domaine vers l'ip du VPS
 
-- Ouvir les port nécesssaires pour Pangolin (wireguard) sur le firwall du VPS
+- Ouvrir les port nécessaires pour Pangolin (wireguard) sur le firwall du VPS
 - 
 ```bash
 ufw allow 51820/udp   # WireGuard (Pangolin)
@@ -1681,12 +1686,45 @@ ufw allow 21820/udp   # UDP pour les clients
 sudo mkdir -p /opt/pangolin
 sudo chown adminuser:adminuser /opt/pangolin
 ```
-- Lancer l 'installer (crée les dochiers docker automatiquement)
+- Lancer l 'installer (crée les dossiers docker automatiquement)
 
 - Créer l'accès administrateur pangolin (chemin indiqué en fin d'installation)
-- Créer le serveur Pangolin
+- Créer le serveur Pangolin (sélectionner pour une utilisation avec Docker ou Systemd)
+  
+![pangolin](../Screenshot/39_Pangolin.png)
+![PANGOLIN](../Screenshot/39_a_Pangolin.png)
 
 ### 17.2.4 Client Newt sur vm-web
+
+#### 17.2.4.1 Dans Docker 
+
+
+- Créer le répertoire pour Newt et le fichier docker-compose
+```bash
+sudo mkdir -p /opt/newt
+sudo nano /opt/newt/docker-compose.yml
+```
+
+
+```yaml
+services:
+  newt:
+    image: fosrl/newt
+    container_name: newt
+    restart: unless-stopped
+    environment:
+      - PANGOLIN_ENDPOINT=${PANGOLIN_ENDPOINT}
+      - NEWT_ID=${NEWT_ID}
+      - NEWT_SECRET=${NEWT_SECRET}
+```
+- Créer le fichier .env et définir les variables
+   
+```bash
+sudo nano /opt/newt/.env
+```
+
+
+#### 17.2.4.2 Avec Systemd (Alternative)
 
 - Installer le client Newt sur la vm en VLAN 40 : les commandes sont indiquées lors de la création du serveur Pangolin (https://docs.pangolin.net/self-host/quick-install)
 
@@ -1702,7 +1740,7 @@ Description=Newt Pangolin Tunnel
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/newt --id xxxxxxxxxx --secret xxxxxxxxxxxxxxx --endpoint https://pangolin.rafikix.fr
+ExecStart=/usr/local/bin/newt --id xxxxxxxxxx --secret xxxxxxxxxxxxxxx --endpoint https://domaine
 Restart=always
 RestartSec=5
 
@@ -1717,8 +1755,7 @@ sudo systemctl status newt
 
 
 
-
-## 17-3 Services Docker dans vm-web (test avec Wiki.js)
+## 17.3 Services Docker dans vm-web (test avec Wiki.js)
 
 ### 17.3.1 Installation de Wiki.js 
 
@@ -1759,15 +1796,15 @@ sudo chmod 600 /opt/wikijs/.env
 
 - Enregistrer les credentials dans .env
 
-- Se placer dans le dossier /opt/wiki.js
+- Se placer dans le dossier /opt/wikijs
 
-- Lancer le contenair
+- Lancer le container
 
 ```bash
 sudo docker compose up -d
 ```
 
-- Vérifier l'état du contenair
+- Vérifier l'état du container
 
 ```bash
 sudo docker compose ps
@@ -1785,15 +1822,89 @@ Un fois le service déployé il faut créer une ressources sur Pangolin pour le 
 
 ![wiki.js](../Screenshot/39-1_Pangolin.png)
 
+## 17.4 Crowdsec sur VPS
 
+### 17.4.1 Installation Crowdsec
+Tous les composants sont installés sur le VPS pour être indépendant du set-up distribué centralisé sur OPNsense.
 
+- Installation
+```bash
+sudo curl -s https://install.crowdsec.net | sudo sh
+sudo apt install crowdsec crowdsec-firewall-bouncer-iptables -y
+```
+- Enroller dans la console Crowdsec (copier la commande depuis Crowdsec)
+```bash
+sudo cscli console enroll <clé>
+```
+- Accepter l'enrollement dans la console Crowdsec
+
+- La mise à jour de la console Crowdsec est décalée, vérifier que le bouncer est bien installé :
+```bash
+sudo cscli bouncers list
+```
+- Redémarrer le service Crowdsec
+```bash
+sudo systemctl restart crowdsec
+```
+
+- Installer la collection pour Traefik
+```bash
+sudo cscli collections install crowdsecurity/traefik
+sudo systemctl reload crowdsec
+```
+
+### 17.4.2 Acquisition des logs pour traefik
+
+Nécessaire pour que Crowdsec voit toutes les requêtes HTTP et HTTPS qui passent par traefik. 
+
+- Modifier le fichier de configuration traefik, ajouter :
+```yml
+accessLog:
+  filePath: "/var/log/traefik/access.log" #chemin des logs
+  format: common #format apache/nginx standard
+  bufferingSize: 100 #pour éviter I/O trop fréquents sur le disque
+```
+- Redémarrer le container Traefik
+
+```bash
+sudo docker restart traefik
+``` 
+- Vérifier que le fichier de logs est bien créé
+```bash
+xx:~$ ls /opt/pangolin/config/traefik/logs/
+access.log
+```
+- Créer le fichier d'acquisition Crowdsec
+
+```bash
+sudo nano /etc/crowdsec/acquis.d/traefik.yaml
+```
+
+```yml
+filenames:
+  - /opt/pangolin/config/traefik/logs/access.log
+labels:
+  type: traefik #Crowdsec utilisera le parser crowdsecurity/traefik
+  ```
+
+- Redémarrer Crowdsec
+
+```bash
+sudo systemctl restart crowdsec
+```
+
+- Vérifier que le parsing fonctionne et le fonctionnement général de Crowdsec
+
+```bash
+sudo cscli metrics
+```
+![alt text](../Screenshot/40_Crowdsec_VPS.png)
 
 
 # 18. PBS (À venir)
 
 
-# 19. Sauvegardes 3-2-1
-
+# 19. Sauvegardes 3-2-1 (À venir)
 
 
 

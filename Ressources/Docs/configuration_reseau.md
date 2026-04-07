@@ -18,19 +18,20 @@
 | __Node 1__         | Proxmox1      | 10.10.30.101/24 | -    | VLAN 30 (CrowdSec) <br> vmbr0 | Communication agents CrowdSec nodes vers plugin Crowdsec sur OPNsense |
 | __Node 2__        | Proxmox2      | 10.10.30.102/24  | -  |  VLAN 30 (CrowdSec)  <br> vmbr0 | Communication agents CrowdSec nodes vers plugin Crowdsec sur OPNsense |
 | __Node 3__        | Proxmox3      | 10.10.30.103/24  | -   | VLAN 30 (CrowdSec) <br> vmbr0 | Communication agents CrowdSec nodes vers plugin Crowdsec sur OPNsense |
-| __Switch__ | Switch | 10.10.20.111 | 10.10.20.1| - |UI switch <br> 802.1Q  Tags VLANs 5,10,20,30,99,100 |
+| __Switch__ | Switch | 10.10.20.111 | 10.10.20.1| - |UI switch <br> 802.1Q  Tags VLANs 5,10,20,30,40,99,100 |
 | __Firewall__ | vm-OPNsense | Voir interfaces|- |-  | Firewall central <br> OPNsense 25.7 <br> Crowdsec (Plugin) <br> Suricata (Plugin) <br> Tailscale (Plugin) <br> Agent Qemu (Plugin)|
 | *Interface* | vtnet0| 192.168.1.210/24 <br> __WAN__ |  - | VLAN 5 (WAN)<br> vmbr0 | vmbr0 : VLAN aware <br> |
 | *Interface*| vtnet1| 10.10.10.1/24 (LAN) __Services__ | -  |VLAN 10 (Services Infra) <br> vmbr0 | Interface LAN OPNsense <br> Services infra + apps non exposées |
 |*Interface* |vtnet3 | 10.10.20.1/24 __MGMT__ | -  |VLAN 20 (MGMT) <br> vmbr0 | Management Proxmox <br> + Management du switch| 
 |*Interface* |vtnet2 | 10.10.30.1/24 __CrowdSec__ | - | opt2   VLAN 30 (CrowdSec) <br> vmbr0 | opt2 - Communication agents CrowdSec nodes vers plugin CrowdSec sur OPNsense    |
-|*Interface* | vtnet4|  172.16.100.1 __DMZ__ | -  |VLAN 100 (DMZ) <br> vmbr0 | Interface DMZ OPNsense <br> Architecture en évolution vers VPS + Pangolin|
-| *Interface* | vtnet6| 10.10.40.1/24 <br> __Services_WEB__ |  - | VLAN 40 (Services Web) <br> vmbr0 | Pour exposition des services wev via vps+pangolin|
+|*Interface* | vtnet4|  172.16.100.1/24 __DMZ__ | -  |VLAN 100 (DMZ) <br> vmbr0 | Interface DMZ OPNsense <br> Architecture en évolution vers VPS + Pangolin|
+| *Interface* | vtnet6| 10.10.40.1/24 <br> __Services_WEB__ |  - | VLAN 40 (Services Web) <br> vmbr0 | Pour exposition des services web via vps+pangolin|
 |*Interface* | tailscale0|  - |    -  |opt1 <br> (Tailscale_Remote) | opt1 - Accès nodes via Tailscale 
-| __VM Traefik__  | vm-traefik | 172.16.100.100/24 Web|  172.16.100.1   |VLAN 100 (Web) <br> vmbr0 | Reverse proxy - Existante mais inutilisée, voir VPS + Pangolin |
+| __VM Traefik__  | vm-traefik | 172.16.100.100/24 Web|  172.16.100.1   |VLAN 100 (Web) <br> vmbr0 | Reverse proxy - Conservée mais inutilisée, voir VPS + Pangolin |
 | __LXC DNS__ | ct-dns    | 10.10.10.50/24  | 10.10.10.1   | VLAN 10 <br> vmbr0  | AdGuardHome |
 | __LXC Zabbix__ | ct-zabbix| 10.10.10.40/24  |  10.10.10.1   | VLAN 10 <br> vmbr0 | Zabbix 
-| __VM WEB__ | vm-web     | 10.10.40.100/24  |  10.10.40.1.1  |VLAN 40 <br> vmbr0 | Docker, Client Newt + services <br> Wiki.js <br> etc..|
+| __VM WEB__ | vm-web     | 10.10.40.100/24  |  10.10.40.1  |VLAN 40 <br> vmbr0 | Docker, Client Newt + services <br> Wiki.js <br> etc..|
+| __VPS__  | vps pangolin  | IP VPS | - | -  | Pangolin (Traefik + Gerbil) -> vm-web (VLAN 40) |
 | __PBS__  | vm-pbs  | 10.10.10.60/24 | 10.10.10.1 |VLAN 10 <br> vmbr0  | Proxmox Backup Server | 
 
 
