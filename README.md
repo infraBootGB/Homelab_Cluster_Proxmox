@@ -1,12 +1,14 @@
 # Homelab Cluster Proxmox
 
+
+
 <div align="center">
 
-[![Proxmox VE 9](https://img.shields.io/badge/Proxmox%20VE-9-orange?style=flat-square&logo=proxmox)](https://www.proxmox.com) [![OPNsense 25.7](https://img.shields.io/badge/OPNsense-25.7-blue?style=flat-square&logo=opnsense)](https://opnsense.org) [![CrowdSec Centralized](https://img.shields.io/badge/CrowdSec-Centralized-green?style=flat-square&logo=crowdsec)](https://crowdsec.net) [![ZFS Local Mirrors](https://img.shields.io/badge/ZFS-Local%20Mirrors-lightgrey?style=flat-square&logo=zfs)](https://openzfs.org) [![Tailscale Zero Trust](https://img.shields.io/badge/Tailscale-Zero%20Trust-purple?style=flat-square&logo=tailscale)](https://tailscale.com) [![Docker Containers](https://img.shields.io/badge/Docker-Containers-blue?style=flat-square&logo=docker)](https://www.docker.com)
+[![Proxmox VE 9](https://img.shields.io/badge/Proxmox%20VE-9-orange?style=flat-square&logo=proxmox)](https://www.proxmox.com) [![OPNsense 25.7](https://img.shields.io/badge/OPNsense-25.7-blue?style=flat-square&logo=opnsense)](https://opnsense.org) [![CrowdSec](https://img.shields.io/badge/CrowdSec-Centralized-green?style=flat-square&logo=crowdsec)](https://crowdsec.net) [![ZFS Local Mirrors](https://img.shields.io/badge/ZFS-Local%20Mirrors-lightgrey?style=flat-square&logo=zfs)](https://openzfs.org) [![Tailscale Zero Trust](https://img.shields.io/badge/Tailscale-Zero%20Trust-purple?style=flat-square&logo=tailscale)](https://tailscale.com) [![Docker Containers](https://img.shields.io/badge/Docker-Containers-blue?style=flat-square&logo=docker)](https://www.docker.com) [![Pangolin](https://img.shields.io/badge/Pangolin-Tunnel-darkblue?style=flat-square)](https://pangolin.net) [![VPS](https://img.shields.io/badge/VPS-Linux-grey?style=flat-square&logo=linux)]()
 
 </div>
 
-Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'administration systèmes et réseaux. Infrastructure en production, documentée comme en contexte professionnel.
+Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'administration systèmes et réseaux. Infrastructure en production, documentée.
 
 ## 📚 Sommaire
 
@@ -41,7 +43,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - VLAN 4094 : Blackhole
 - DNS interne : Unbound -> AdGuard Home -> DoH (Quad9)
 - Sécurité : OPNsense + IDS (Suricata) + CrowdSec centralisé
-- Exposition des dervices via VPS + Pangolin (Traefik + Wireguard)
+- Exposition des services via VPS + Pangolin (Traefik + Wireguard)
 - Accès distant sécurisé : Tailscale
 - Sauvegardes : PBS + stratégie 3-2-1 (en cours)
 
@@ -74,7 +76,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - __Proxmox__ : Solution open-source basée sur Debian, adaptable à un matériel hétérogène
 - __ZFS__ : Intégrité des données, snapshots et réplication inter-nœuds
 - __OPNsense__ : Firewall open-source communautaire, alternative à pfSense - utilisation des plugins (CrowdSec, Suricata, Tailscale)
-- __CrowdSec__ : Protection collaborative et moderne, LAPI centralisée sur OPNsense
+- __CrowdSec__ : Protection collaborative et moderne, LAPI centralisée sur OPNsense et indépendante sur VPS
 - __AdGuard Home__ : Filtrage DNS avec DoH vers Quad9
 - __Zabbix__ : Supervision open-source reconnue, alertes Telegram
 - __Pangolin__ : Solution moderne regroupant un reverse proxy traefik, routage dynamique, TLS automatique (Let's Encrypt), wireguard
