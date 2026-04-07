@@ -2,11 +2,16 @@
 
 
 
+
+
 <div align="center">
 
-[![Proxmox VE 9](https://img.shields.io/badge/Proxmox%20VE-9-orange?style=flat-square&logo=proxmox)](https://www.proxmox.com) [![OPNsense 25.7](https://img.shields.io/badge/OPNsense-25.7-blue?style=flat-square&logo=opnsense)](https://opnsense.org) [![CrowdSec](https://img.shields.io/badge/CrowdSec-Centralized-green?style=flat-square&logo=crowdsec)](https://crowdsec.net) [![ZFS Local Mirrors](https://img.shields.io/badge/ZFS-Local%20Mirrors-lightgrey?style=flat-square&logo=zfs)](https://openzfs.org) [![Tailscale Zero Trust](https://img.shields.io/badge/Tailscale-Zero%20Trust-purple?style=flat-square&logo=tailscale)](https://tailscale.com) [![Docker Containers](https://img.shields.io/badge/Docker-Containers-blue?style=flat-square&logo=docker)](https://www.docker.com) [![Pangolin](https://img.shields.io/badge/Pangolin-Tunnel-darkblue?style=flat-square)](https://pangolin.net) [![VPS](https://img.shields.io/badge/VPS-Linux-grey?style=flat-square&logo=linux)]()
+[![Proxmox VE 9](https://img.shields.io/badge/Proxmox%20VE-9-orange?style=flat-square&logo=proxmox)](https://www.proxmox.com) [![OPNsense 25.7](https://img.shields.io/badge/OPNsense-25.7-blue?style=flat-square&logo=opnsense)](https://opnsense.org) [![CrowdSec](https://img.shields.io/badge/CrowdSec-Centralized-green?style=flat-square&logo=crowdsec)](https://crowdsec.net) [![ZFS Local Mirrors](https://img.shields.io/badge/ZFS-Local%20Mirrors-lightgrey?style=flat-square&logo=zfs)](https://openzfs.org) [![Tailscale Zero Trust](https://img.shields.io/badge/Tailscale-Zero%20Trust-purple?style=flat-square&logo=tailscale)](https://tailscale.com) [![Docker Containers](https://img.shields.io/badge/Docker-Containers-blue?style=flat-square&logo=docker)](https://www.docker.com) [![Pangolin](https://img.shields.io/badge/Pangolin-Tunnel-darkblue?style=flat-square)](https://pangolin.net) [![VPS](https://img.shields.io/badge/VPS-Linux-grey?style=flat-square&logo=linux)]() [![Uptime Kuma](https://img.shields.io/badge/Uptime%20Kuma-Monitoring-green?style=flat-square)](https://uptime.kuma.pet)
 
 </div>
+
+
+
 
 Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'administration systèmes et réseaux. Infrastructure en production, documentée.
 
@@ -26,8 +31,9 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - Déployer un cluster Proxmox 3 nœuds en haute disponibilité
 - Mettre en place une segmentation réseau par VLAN
 - Sécuriser l'infrastructure (firewall, IDS, CrowdSec, Zero Trust)
-- Exposer des services via reverse proxy (évolution en cours : VPS + Pangolin)
-- Mettre en place la supervision et les alertes
+- Exposer des services via reverse proxy (VPS + Pangolin)
+- Mettre en place la supervision et les alertes (Zabbix/Telegram)
+- Monitoring de disponibilité des services exposés (Uptime Kuma)
 - Mettre en place les sauvegardes (PBS - en cours)
 
 ## 🏛️ Résumé d'architecture
@@ -38,7 +44,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - VLAN 10 : Services infra + apps internes
 - VLAN 20 : Management Proxmox + UI switch
 - VLAN 30 : Communication CrowdSec (Agents -> LAPI sur OPNsense)
-- VLAN 40 : Service docker exposés via Pangolin (client newt)
+- VLAN 40 : Services docker exposés via Pangolin (client newt)
 - VLAN 99 : Corosync isolé
 - VLAN 4094 : Blackhole
 - DNS interne : Unbound -> AdGuard Home -> DoH (Quad9)
@@ -63,6 +69,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - Segmentation réseau par VLAN et configuration de switch manageable
 - Déploiement et administration d'un firewall OPNsense
 - Supervision avec Zabbix (agents, alertes Telegram)
+- Monitoring de disponibilité des services (Uptime Kuma, alertes Telegram)
 - Sécurisation des accès (SSH par clés, Tailscale, CrowdSec)
 - DNS interne avec filtrage (AdGuard Home, DoH)
 - Déploiement de conteneurs Docker
@@ -80,6 +87,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - __AdGuard Home__ : Filtrage DNS avec DoH vers Quad9
 - __Zabbix__ : Supervision open-source reconnue, alertes Telegram
 - __Pangolin__ : Solution moderne regroupant un reverse proxy traefik, routage dynamique, TLS automatique (Let's Encrypt), wireguard
+- __Uptime Kuma__ : Monitoring de disponibilité des services exposés, alertes Telegram
 - __Tailscale__ : Accès distant Zero Trust sans exposition de ports
 - __PBS__ : Proxmox Backup Server - sauvegardes et tests de restauration
 - __Docker__ : Déploiement de conteneurs applicatifs (Wiki.js, etc.)

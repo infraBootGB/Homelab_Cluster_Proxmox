@@ -1900,6 +1900,50 @@ sudo cscli metrics
 ```
 ![alt text](../Screenshot/40_Crowdsec_VPS.png)
 
+## 17.5 Monitoring VPS
+
+### 17.5.1  Uptime Kuma
+
+Installé sur la vm-web en VLAN40 pour surveiller la disponibilité des services exposés sur le VPS via pangolin.
+
+- Dans la vm-web, créer le répertoire sur la vm-web
+```bash
+sudo mkdir -p /opt/uptimekuma
+```
+- Récupérer le template docker-compose [ici](https://github.com/louislam/uptime-kuma/blob/master/compose.yaml)
+  
+- Créer le fichier docker-compose
+```bash
+sudo nano docker-compose.yml
+```
+- Enregistrer une nouvelle ressource dans pangolin (indiquer IP+port)
+- Se connecter via l'url indiquée dans Pangolin
+- Choisir la base de donnée (ici SQlite)
+- Créer le compte administrateur
+- Ajouter une sonde
+- Créer une alerte telegram (Type, Nom, jeton du robot et Chat id) et enregistrer comme alerte par défaut pour ajouter automatiquement aux nouvelles sondes
+- Vérifier le tableau de bord
+
+![alt text](../Screenshot/41_uptimekuma.png)
+
+### 17.5.2 Zabbix
+
+Pour surveiller la joignabilité du VPS.
+
+- Zabbix -> Data Collection -> Host groups -> Create host group
+
+- Zabbix -> Data Collection -> Hosts ->  Create host
+    - Choisir le template ICMP Ping
+    - Compléter Host-name et IP -> enregistrer
+
+![alt text](../Screenshot/42_zabbix_vps.png)
+
+- Tester le fonctionnement en coupant le vps
+
+![alt text](../Screenshot/42-1_zabbix-vps.png)
+
+
+
 
 # 18. PBS (À venir)
 
