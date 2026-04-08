@@ -97,6 +97,9 @@
   - [17.4 Crowdsec sur VPS](#174-crowdsec-sur-vps)
     - [17.4.1 Installation Crowdsec](#1741-installation-crowdsec)
     - [17.4.2 Acquisition des logs pour traefik](#1742-acquisition-des-logs-pour-traefik)
+  - [17.5 Monitoring VPS](#175-monitoring-vps)
+    - [17.5.1  Uptime Kuma](#1751--uptime-kuma)
+    - [17.5.2 Zabbix](#1752-zabbix)
 - [18. PBS (À venir)](#18-pbs-à-venir)
 - [19. Sauvegardes 3-2-1 (À venir)](#19-sauvegardes-3-2-1-à-venir)
 
