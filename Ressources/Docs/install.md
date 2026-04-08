@@ -1651,11 +1651,46 @@ chown -R adminuser:adminuser /home/adminuser/.ssh
 chmod 700 /home/adminuser/.ssh
 chmod 600 /home/adminuser/.ssh/authorized_keys
 ```
-- tester la connexion ssh avec le nouvel utilisateur dans une autre shell  
-- Une fois ok configurer ssh pour désactiver connection par mot de passe et supprimer accès root.
+- Tester la connexion ssh avec le nouvel utilisateur dans une autre shell
 
-- tester que la connexion ne fonctionne pas avec root
+   
+- Une fois la connexion établie, editer */etc/ssh/sshd.config* pour désactiver la connection par mot de passe, supprimer l'accès root et modifier le port ssh.
 
+>Note: le VPS étant sur Ubuntu il est nécessaire de modifier systemd pour modifier le port ssh utilisé :
+>
+>- Editer le fichier de configuration :
+>```bash
+>   sudo systemctl edit ssh.socket
+>```
+>- Insérer les nouvelles données :
+> ```bash
+>   [Socket]
+>   ListenStream=
+>   ListenStream=0.0.0.0:47022  # toutes les interfaces IPv4
+>   ListenStream=[::]:47022     # toutes les interfaces IPv6
+>```
+>- Ctrl+X, Y pour valider, Entrée.
+>- Recharger la configuration
+>```bash
+>   sudo systemctl daemon-reload
+>```
+>- Redémarrer le socket
+> ```bash
+>   sudo systemctl restart ssh.socket
+>```
+>- Vérifier le changement de port
+>```bash
+>   sudo ss -tlnp | grep sshd
+>```
+> - Tester la connexion depuis un autre shell
+> - Fermer le port 22 dans le firewall
+> ```bash
+>   sudo ufw delete allow 22/tcp
+>```
+>- Vérifier 
+>```bash
+>sudo ss -tlnp | grep sshd
+>```
 ### 17.2.2 Docker sur VPS
 
 - Installer docker [voir doc officielle pour Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
@@ -1899,6 +1934,10 @@ sudo systemctl restart crowdsec
 sudo cscli metrics
 ```
 ![alt text](../Screenshot/40_Crowdsec_VPS.png)
+
+
+
+
 
 ## 17.5 Monitoring VPS
 
