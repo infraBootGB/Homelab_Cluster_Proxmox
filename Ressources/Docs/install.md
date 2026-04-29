@@ -46,6 +46,7 @@
     - [11.1.1 Routage Tailscale](#1111-routage-tailscale)
   - [11.2 CrowdSec](#112-crowdsec)
   - [11.3 IDS (natif OPNsense basé sur suricata)](#113-ids-natif-opnsense-basé-sur-suricata)
+  - [11.4 Intégration des logs suricata dans Crowdsec](#114-intégration-des-logs-suricata-dans-crowdsec)
 - [12. Installations de CrowdSec sur les 3 nodes](#12-installations-de-crowdsec-sur-les-3-nodes)
   - [12.1 Création d'une sous-interface dans Proxmox](#121-création-dune-sous-interface-dans-proxmox)
   - [12.2 Création d'une interface dédiée sur OPNsense](#122-création-dune-interface-dédiée-sur-opnsense)
@@ -100,8 +101,19 @@
   - [17.5 Monitoring VPS](#175-monitoring-vps)
     - [17.5.1  Uptime Kuma](#1751--uptime-kuma)
     - [17.5.2 Zabbix](#1752-zabbix)
-- [18. PBS (À venir)](#18-pbs-à-venir)
-- [19. Sauvegardes 3-2-1 (À venir)](#19-sauvegardes-3-2-1-à-venir)
+- [18. Restructuration des disques](#18-restructuration-des-disques)
+  - [18.1 Évolution de la configuration des pools ZFS](#181-évolution-de-la-configuration-des-pools-zfs)
+- [19. PBS - Proxmox Backup Server](#19-pbs---proxmox-backup-server)
+  - [19.1 Installation VM PBS](#191-installation-vm-pbs)
+    - [19.1.1  VM Debian 12](#1911--vm-debian-12)
+    - [19.1.2 Installation PBS sur Debian](#1912-installation-pbs-sur-debian)
+  - [19.2 Configuration du datastore](#192-configuration-du-datastore)
+  - [19.3 Connexion cluster PVE et PBS](#193-connexion-cluster-pve-et-pbs)
+  - [19.4 Configurer les sauvegardes](#194-configurer-les-sauvegardes)
+    - [19.4.1 Backup](#1941-backup)
+    - [19.4.2 Rétention](#1942-rétention)
+  - [19.5 Sync Backblaze B2 (copie off-site) (à venir)](#195-sync-backblaze-b2-copie-off-site-à-venir)
+- [20. Nextcloud (+ sauvegarde / disque réseau) (à venir)](#20-nextcloud--sauvegarde--disque-réseau-à-venir)
 
 # Guide d'installation
 
@@ -1014,6 +1026,50 @@ Pour consulter les alertes : Services -> Intrusion Detection -> Administration -
 
 > Note : Faire un backup complet de la vm pour sauvegarder la configuration complète.(clic droit sur la vm concernée). Ajouter à la réplication également [cf. Réplication ZFS](#6-réplication-zfs)
  
+## 11.4 Intégration des logs suricata dans Crowdsec
+
+- Se connecter dans le shell OPNsense
+- Identifier le fichier
+
+```bash
+find /var/log/suricata -name "eve.json"
+```
+- Installer la collection dans Crowdsec 
+
+```bash
+cscli collections install crowdsecurity/suricata
+```
+
+- Dans OPNsense -> services -> Intrusion detection -> cocher enable eve syslog output -> apply
+
+- Créer le fichier d'acquisition des logs (vim sur FreeBSD)
+
+```bash
+vi /usr/local/etc/crowdsec/acquis.d/suricata.yaml #("i" pour passer en mode insertion et échap + :wq pour sortir)
+```
+
+```yaml
+filenames:
+  - /var/log/suricata/eve.json
+force_inotify: true             #pour forcer la lecture des changements de fichiers. non automatique dans freeBSD
+poll_without_inotify: true      #pour forcer la lecture des changements de fichiers. non automatique dans freeBSD
+labels: 
+  type: suricata-evelogs
+source: file
+```
+
+
+
+- Redémarrer Crowdsec
+
+```bash
+service crowdsec restart
+```
+- Vérifier ([Doc Crowdsec](https://docs.crowdsec.net/docs/cscli/cscli_explain/))
+
+```bash
+tail -1 /var/log/suricata/eve.json | cscli explain --type suricata-evelogs -f -
+```
 
 
 
@@ -1985,18 +2041,114 @@ Pour surveiller la joignabilité du VPS.
 ![alt text](../Screenshot/42-1_zabbix-vps.png)
 
 
+     
+
+# 18. Restructuration des disques
+
+> Note : voir [architecture.md](./architecture.md)
+
+## 18.1 Évolution de la configuration des pools ZFS
+
+La configuration initiale en mirror ZFS intra-nœud a été remplacée 
+par un pool ZFS simple par noeud, combiné à la réplication ZFS 
+inter-nœuds déjà existante.
+
+**Avant :**
+- Node 2 : NVMe 2x2To mirror ZFS
+- Node 3 : NVMe 500Go + 1To mirror ZFS
+
+**Après :**
+- Node 2 : NVMe 2To (tank) + NVMe 1To ( destiné à Nextcloud)
+- Node 3 : NVMe 2To (tank) + NVMe 500Go (destiné à PBS)
 
 
-# 18. PBS (À venir)
+
+# 19. PBS - Proxmox Backup Server
+> Stratégie de sauvegarde 3-2-1  -> [architecture.md](./architecture.md)
+
+## 19.1 Installation VM PBS
+
+### 19.1.1  VM Debian 12
+
+- Créer la VM :
+    - Node 3
+    - Disque système 32 GO  sur tank-vm-data-node3
+    - CPU : 2 coeurs
+    - RAM 4Go
+    - VLAN 10
+  
+- Faire la mise à jour, redémarrer, sécuriser SSH
+
+### 19.1.2 Installation PBS sur Debian
+
+> Note : [Doc PBS](https://pbs.proxmox.com/docs/installation.html#install-proxmox-backup-server-on-debian)
+
+- Télécharger la clé GPG
+
+```bash
+wget https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+```
 
 
-# 19. Sauvegardes 3-2-1 (À venir)
+- Configuration du fichier des dépôts PBS
+```bash
+echo "deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription" > /etc/apt/sources.list.d/pbs.list
+```
+
+- Installer
+
+```bash
+apt update
+apt install proxmox-backup #installation complète avec kernel Proxmox + supporte ZFS
+```
+
+## 19.2 Configuration du datastore
+
+- Se connecter à l'interface graphique : IP_vm:8007
+
+- Ajouter le NVMe 500Go en passthrough (pas possible en GUI)
+```bash
+qm set 105 -scsi1 /dev/disk/by-id/nvme-xxxxxxxxxxxxxxxx
+```
+
+- Interface PBS -> Storage/disks -> le disque est visible -> initialize disk with GPT
+- Interface PBS -> Storage/disks -> Create ZFS
+
+![pbs](../Screenshot/43-9_pbs.png)
 
 
 
-        
+## 19.3 Connexion cluster PVE et PBS
+
+- Dans GUI Proxmox : Datacenter -> storage -> Add -> Proxmox Backup Server 
+- Entrer les information et récupérer le Fingerprint dans l'interface PBS -> Datastore -> "Show Connection Information" pour récupérer le fingerprint -> create . Le disque apparait ensuite dans les stockages du datacenter PVE.
 
 
+## 19.4 Configurer les sauvegardes
+
+### 19.4.1 Backup
+- Datacenter -> Backup --> Add
+
+![pbs](../Screenshot/43-10_pbs.png)
+
+> Note : "03:00" = tous les jours à 3h
+
+- Run now pour démarrer les jobs ou attendre la sauvegarde automatique 
+
+### 19.4.2 Rétention
+
+- Datacenter -> Backup -> Edit
+
+![pbs](../Screenshot/43-11_pbs.png)
+
+> Note : dernière semaine complète + dernier mois + 3 derniers mois
+> Restauration testée
+
+## 19.5 Sync Backblaze B2 (copie off-site) (à venir)
+
+
+
+# 20. Nextcloud (+ sauvegarde / disque réseau) (à venir)
 
 
 

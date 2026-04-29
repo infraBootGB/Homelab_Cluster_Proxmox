@@ -3,7 +3,7 @@
 
 ## **Noeuds Proxmox VE 9** 
 
-
+> Note : L'organisation des disque à été modifée ->  voir [architecture.md](./architecture.md)
 
 | Élément | Nom | Processeur  | RAM | Réseau | Stockage | Rôle |
 |----------|---|---------|-----|----------|-------|-------|

@@ -1,8 +1,8 @@
 # Configuration réseau (finale)
 
-> **Notes :** 
+> **Note :** 
 > - La DMZ (VLAN 100 / vm-traefik) est en place mais non utilisés car l'exposition des services a évoluée vers  VPS + Pangolin. Règle NAToutbound désactivée.
-> - PBS (vm-pbs) est planifié, pas encore déployé.
+
 
 - VLAN aware activé sur vmbr0
 

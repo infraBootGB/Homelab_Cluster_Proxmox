@@ -4,17 +4,16 @@
 
 
 
+
+
 <div align="center">
 
-[![Proxmox VE 9](https://img.shields.io/badge/Proxmox%20VE-9-orange?style=flat-square&logo=proxmox)](https://www.proxmox.com) [![OPNsense 25.7](https://img.shields.io/badge/OPNsense-25.7-blue?style=flat-square&logo=opnsense)](https://opnsense.org) [![CrowdSec](https://img.shields.io/badge/CrowdSec-Centralized-green?style=flat-square&logo=crowdsec)](https://crowdsec.net) [![ZFS Local Mirrors](https://img.shields.io/badge/ZFS-Local%20Mirrors-lightgrey?style=flat-square&logo=zfs)](https://openzfs.org) [![Tailscale Zero Trust](https://img.shields.io/badge/Tailscale-Zero%20Trust-purple?style=flat-square&logo=tailscale)](https://tailscale.com) [![Docker Containers](https://img.shields.io/badge/Docker-Containers-blue?style=flat-square&logo=docker)](https://www.docker.com) [![Pangolin](https://img.shields.io/badge/Pangolin-Tunnel-darkblue?style=flat-square)](https://pangolin.net) [![VPS](https://img.shields.io/badge/VPS-Linux-grey?style=flat-square&logo=linux)]() [![Uptime Kuma](https://img.shields.io/badge/Uptime%20Kuma-Monitoring-green?style=flat-square)](https://uptime.kuma.pet)
+[![Proxmox VE 9](https://img.shields.io/badge/Proxmox%20VE-9-orange?style=flat-square&logo=proxmox)](https://www.proxmox.com) [![OPNsense 25.7](https://img.shields.io/badge/OPNsense-25.7-blue?style=flat-square&logo=opnsense)](https://opnsense.org) [![CrowdSec](https://img.shields.io/badge/CrowdSec-Centralized-green?style=flat-square&logo=crowdsec)](https://crowdsec.net) [![ZFS Replication](https://img.shields.io/badge/ZFS-Replication-lightgrey?style=flat-square&logo=zfs)](https://openzfs.org) [![Tailscale Zero Trust](https://img.shields.io/badge/Tailscale-Zero%20Trust-purple?style=flat-square&logo=tailscale)](https://tailscale.com) [![Docker Containers](https://img.shields.io/badge/Docker-Containers-blue?style=flat-square&logo=docker)](https://www.docker.com) [![Pangolin](https://img.shields.io/badge/Pangolin-Tunnel-ff6600?style=flat-square)](https://fossorial.io) [![VPS](https://img.shields.io/badge/VPS-Linux-grey?style=flat-square&logo=linux)]() [![Uptime Kuma](https://img.shields.io/badge/Uptime%20Kuma-Monitoring-green?style=flat-square)](https://uptime.kuma.pet)
 
 </div>
 
 
-
-
-Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'administration systèmes et réseaux. Infrastructure en production, documentée.
-
+Lab infra personnel, en production, en évolution!
 ## 📚 Sommaire
 
 - [Homelab Cluster Proxmox](#homelab-cluster-proxmox)
@@ -34,12 +33,12 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 - Exposer des services via reverse proxy (VPS + Pangolin)
 - Mettre en place la supervision et les alertes (Zabbix/Telegram)
 - Monitoring de disponibilité des services exposés (Uptime Kuma)
-- Mettre en place les sauvegardes (PBS - en cours)
+- Mettre en place les sauvegardes (PBS)
 
 ## 🏛️ Résumé d'architecture
 
 - Virtualisation : Cluster Proxmox 3 nœuds (HA Manager + réplication ZFS)
-- Stockage : ZFS mirror + réplication inter-nœuds (bidirectionnelle par datasets)
+- Stockage : ZFS + réplication inter-nœuds (bidirectionnelle par datasets)
 - VLAN 5 : WAN
 - VLAN 10 : Services infra + apps internes
 - VLAN 20 : Management Proxmox + UI switch
@@ -94,6 +93,7 @@ Homelab conçu et maintenu en autonomie dans le cadre d'une reconversion vers l'
 
 ## 📂 Documentation technique
 
+- [Architecture](Ressources/Docs/architecture.md)
 - [Configuration réseau](Ressources/Docs/configuration_reseau.md)
 - [Guide d'installation](Ressources/Docs/install.md)
 - [Hardware](Ressources/Docs/hardware.md)
