@@ -35,6 +35,15 @@ Lab infra personnel, en production, en évolution!
 - Monitoring de disponibilité des services exposés (Uptime Kuma)
 - Mettre en place les sauvegardes (PBS)
 
+
+
+## 🌐 Schéma de l'infrastructure
+
+
+
+![alt text](Ressources/Docs/Schema_infrastructure_v2.drawio.svg)
+
+
 ## 🏛️ Résumé d'architecture
 
 - Virtualisation : Cluster Proxmox 3 nœuds (HA Manager + réplication ZFS)
@@ -54,12 +63,6 @@ Lab infra personnel, en production, en évolution!
 
 > Note : VLAN 100 : DMZ - non utilisé (architecture migrée vers VPS + Pangolin)
 
-
-## 🌐 Schéma de l'infrastructure
-
-
-
-![alt text](Ressources/Docs/Schema_infrastructure_v2.drawio.svg)
 
 
 ## ⚙️ Choix technologiques
