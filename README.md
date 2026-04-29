@@ -61,21 +61,6 @@ Lab infra personnel, en production, en évolution!
 
 ![alt text](Ressources/Docs/Schema_infrastructure_v2.drawio.svg)
 
-## 🛠️ Compétences mobilisées
-
-- Mise en place d'un cluster Proxmox (VM, LXC, HA Manager, Affinity Rules)
-- Utilisation de ZFS (mirror, réplication, snapshots)
-- Segmentation réseau par VLAN et configuration de switch manageable
-- Déploiement et administration d'un firewall OPNsense
-- Supervision avec Zabbix (agents, alertes Telegram)
-- Monitoring de disponibilité des services (Uptime Kuma, alertes Telegram)
-- Sécurisation des accès (SSH par clés, Tailscale, CrowdSec)
-- DNS interne avec filtrage (AdGuard Home, DoH)
-- Déploiement de conteneurs Docker
-- Documentation technique structurée
-- Gestion d'un VPS pour exposer les services Docker
-- Reverse proxy
-- Wireguard
 
 ## ⚙️ Choix technologiques
 
